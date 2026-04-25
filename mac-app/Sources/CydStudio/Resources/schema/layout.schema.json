@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/micdede/cydStudio/schema/layout.schema.json",
+  "title": "cydStudio Layout",
+  "description": "A complete screen layout pushed to a cydStudio firmware device. The device renders the layout with LVGL and subscribes its widgets to the named datasources.",
+  "type": "object",
+  "required": ["schema_version", "page", "widgets"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1",
+      "description": "Schema version this layout targets. Firmware refuses unknown versions."
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name for the layout (shown in the Mac app)."
+    },
+    "page": {
+      "$ref": "#/$defs/page"
+    },
+    "widgets": {
+      "type": "array",
+      "description": "Widgets are drawn in array order; later widgets sit on top of earlier ones.",
+      "items": { "$ref": "#/$defs/widget" }
+    },
+    "datasources": {
+      "type": "array",
+      "description": "Named data sources widgets can bind to. See datasource.schema.json.",
+      "items": { "$ref": "datasource.schema.json#" }
+    }
+  },
+  "$defs": {
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$",
+      "description": "Hex color, e.g. #FF6A1F. Alpha is not supported."
+    },
+    "binding": {
+      "type": "string",
+      "pattern": "^[a-z_][a-z0-9_]*(\\.[a-z_][a-z0-9_]*)*$",
+      "description": "Path into a datasource value, e.g. 'weather.temp_c' or 'claude.session_pct'."
+    },
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bg": { "$ref": "#/$defs/color" },
+        "rotation": {
+          "type": "integer",
+          "enum": [0, 90, 180, 270],
+          "description": "Display rotation in degrees. Defaults to the board's natural orientation."
+        }
+      }
+    },
+    "common": {
+      "description": "Properties every widget supports.",
+      "properties": {
+        "id": { "type": "string", "description": "Optional id, useful for runtime updates." },
+        "x": { "type": "integer" },
+        "y": { "type": "integer" },
+        "w": { "type": "integer" },
+        "h": { "type": "integer" },
+        "color": { "$ref": "#/$defs/color" },
+        "bg": { "$ref": "#/$defs/color" },
+        "hidden_when": {
+          "type": "string",
+          "description": "Boolean expression over bindings; widget is hidden when true. e.g. '!claude.session_valid'."
+        },
+        "on_press": {
+          "type": "string",
+          "description": "Optional touch action: 'datasource:<id>.refresh', 'page:<name>', 'http:<source_id>:<verb>'."
+        }
+      }
+    },
+    "widget": {
+      "oneOf": [
+        { "$ref": "#/$defs/widget_label" },
+        { "$ref": "#/$defs/widget_bar" },
+        { "$ref": "#/$defs/widget_arc" },
+        { "$ref": "#/$defs/widget_image" },
+        { "$ref": "#/$defs/widget_button" },
+        { "$ref": "#/$defs/widget_line" },
+        { "$ref": "#/$defs/widget_sparkline" }
+      ]
+    },
+    "widget_label": {
+      "type": "object",
+      "required": ["type", "x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "label" },
+        "id": { "type": "string" },
+        "x": { "type": "integer" }, "y": { "type": "integer" },
+        "w": { "type": "integer" },
+        "color": { "$ref": "#/$defs/color" },
+        "text": { "type": "string", "description": "Static text. Mutually exclusive with binding." },
+        "binding": { "$ref": "#/$defs/binding" },
+        "format": { "type": "string", "description": "Python-style format with {} substitution. e.g. '{:.1f}°C'. Only with binding." },
+        "font": {
+          "type": "integer",
+          "enum": [12, 14, 16, 20, 24, 32, 48],
+          "description": "Montserrat font size. Larger sizes cost more flash."
+        },
+        "align": { "type": "string", "enum": ["left", "center", "right"] },
+        "hidden_when": { "type": "string" }
+      }
+    },
+    "widget_bar": {
+      "type": "object",
+      "required": ["type", "x", "y", "w", "h", "binding"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "bar" },
+        "id": { "type": "string" },
+        "x": { "type": "integer" }, "y": { "type": "integer" },
+        "w": { "type": "integer" }, "h": { "type": "integer" },
+        "binding": { "$ref": "#/$defs/binding" },
+        "min": { "type": "number", "default": 0 },
+        "max": { "type": "number", "default": 100 },
+        "color": { "$ref": "#/$defs/color" },
+        "bg": { "$ref": "#/$defs/color" },
+        "rounded": { "type": "boolean", "default": true },
+        "hidden_when": { "type": "string" }
+      }
+    },
+    "widget_arc": {
+      "type": "object",
+      "required": ["type", "x", "y", "size", "binding"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "arc" },
+        "id": { "type": "string" },
+        "x": { "type": "integer" }, "y": { "type": "integer" },
+        "size": { "type": "integer" },
+        "binding": { "$ref": "#/$defs/binding" },
+        "min": { "type": "number", "default": 0 },
+        "max": { "type": "number", "default": 100 },
+        "start_angle": { "type": "integer", "default": 135 },
+        "end_angle": { "type": "integer", "default": 45 },
+        "thickness": { "type": "integer", "default": 8 },
+        "color": { "$ref": "#/$defs/color" },
+        "bg": { "$ref": "#/$defs/color" },
+        "hidden_when": { "type": "string" }
+      }
+    },
+    "widget_image": {
+      "type": "object",
+      "required": ["type", "x", "y", "src"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "image" },
+        "id": { "type": "string" },
+        "x": { "type": "integer" }, "y": { "type": "integer" },
+        "src": {
+          "type": "string",
+          "description": "Either 'builtin:<name>' for firmware-bundled images, or 'http(s)://...' to fetch and cache, or 'data:image/...;base64,...' for inline."
+        },
+        "max_w": { "type": "integer" },
+        "max_h": { "type": "integer" },
+        "hidden_when": { "type": "string" }
+      }
+    },
+    "widget_button": {
+      "type": "object",
+      "required": ["type", "x", "y", "w", "h", "on_press"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "button" },
+        "id": { "type": "string" },
+        "x": { "type": "integer" }, "y": { "type": "integer" },
+        "w": { "type": "integer" }, "h": { "type": "integer" },
+        "text": { "type": "string" },
+        "color": { "$ref": "#/$defs/color" },
+        "bg": { "$ref": "#/$defs/color" },
+        "on_press": { "type": "string" },
+        "hidden_when": { "type": "string" }
+      }
+    },
+    "widget_line": {
+      "type": "object",
+      "required": ["type", "x1", "y1", "x2", "y2"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "line" },
+        "id": { "type": "string" },
+        "x1": { "type": "integer" }, "y1": { "type": "integer" },
+        "x2": { "type": "integer" }, "y2": { "type": "integer" },
+        "color": { "$ref": "#/$defs/color" },
+        "thickness": { "type": "integer", "default": 1 }
+      }
+    },
+    "widget_sparkline": {
+      "type": "object",
+      "required": ["type", "x", "y", "w", "h", "binding"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "sparkline" },
+        "id": { "type": "string" },
+        "x": { "type": "integer" }, "y": { "type": "integer" },
+        "w": { "type": "integer" }, "h": { "type": "integer" },
+        "binding": { "$ref": "#/$defs/binding" },
+        "history": {
+          "type": "integer",
+          "default": 60,
+          "description": "How many samples to keep. Memory cost: history * 2 bytes per sparkline."
+        },
+        "color": { "$ref": "#/$defs/color" },
+        "hidden_when": { "type": "string" }
+      }
+    }
+  }
+}

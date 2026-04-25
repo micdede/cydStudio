@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/micdede/cydStudio/schema/datasource.schema.json",
+  "title": "cydStudio Datasource",
+  "description": "A named source of values that widgets can bind to. The ESP32 polls or accepts pushes for each datasource and exposes the parsed values in a key/value tree under the datasource id.",
+  "type": "object",
+  "required": ["id", "type"],
+  "oneOf": [
+    { "$ref": "#/$defs/http" },
+    { "$ref": "#/$defs/push" },
+    { "$ref": "#/$defs/internal" }
+  ],
+  "$defs": {
+    "http": {
+      "type": "object",
+      "required": ["id", "type", "url"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z_][a-z0-9_]*$" },
+        "type": { "const": "http" },
+        "url": { "type": "string", "format": "uri" },
+        "method": { "type": "string", "enum": ["GET", "POST"], "default": "GET" },
+        "headers": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Static request headers. Avoid embedding secrets — use a push source if the value is sensitive."
+        },
+        "body": { "type": "string", "description": "Request body for POST." },
+        "poll_sec": { "type": "integer", "minimum": 5, "default": 60 },
+        "timeout_ms": { "type": "integer", "default": 5000 },
+        "map": {
+          "type": "object",
+          "additionalProperties": { "type": "string" },
+          "description": "Map of output-key -> JSONPath into the response. Example: { 'temp_c': '$.current.temp_c' }."
+        }
+      }
+    },
+    "push": {
+      "type": "object",
+      "required": ["id", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z_][a-z0-9_]*$" },
+        "type": { "const": "push" },
+        "stale_after_sec": {
+          "type": "integer",
+          "default": 0,
+          "description": "If >0, mark all values stale this many seconds after the last push. Bindings to stale fields read as null."
+        },
+        "fields": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Whitelist of allowed field names. Pushes with extra fields are rejected. Optional (open if omitted)."
+        }
+      }
+    },
+    "internal": {
+      "type": "object",
+      "required": ["id", "type", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z_][a-z0-9_]*$" },
+        "type": { "const": "internal" },
+        "source": {
+          "type": "string",
+          "enum": ["clock", "uptime", "heap", "wifi", "board"],
+          "description": "Built-in firmware-provided values."
+        },
+        "tz": {
+          "type": "string",
+          "description": "POSIX TZ string for the 'clock' source. e.g. 'CET-1CEST,M3.5.0,M10.5.0/3'."
+        },
+        "poll_sec": { "type": "integer", "minimum": 1, "default": 1 }
+      }
+    }
+  }
+}
