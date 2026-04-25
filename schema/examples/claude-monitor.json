@@ -39,7 +39,9 @@
 
         { "type": "line",  "x1": 0,  "y1": 210, "x2": 320, "y2": 210, "color": "#1B1B1B", "thickness": 1 },
         { "type": "label", "x": 16,  "y": 218, "binding": "claude.session_reset_in_sec", "format": "session {duration}", "font": 14, "color": "#888888" },
-        { "type": "label", "x": 304, "y": 218, "binding": "claude.week_reset_in_sec",    "format": "week {duration}",    "font": 14, "color": "#888888", "align": "right" }
+        { "type": "label", "x": 304, "y": 218, "binding": "claude.week_reset_in_sec",    "format": "week {duration}",    "font": 14, "color": "#888888", "align": "right" },
+
+        { "type": "bar",   "x": 0, "y": 234, "w": 320, "h": 6, "binding": "__page.pct", "min": 0, "max": 100, "color": "#2A2A2A", "bg": "#1A1A1A", "rounded": false }
       ]
     },
     {
@@ -61,7 +63,9 @@
         { "type": "bar",   "x": 16,  "y": 148, "w": 288, "h": 16, "binding": "claude.week_pct", "min": 0, "max": 100, "color": "#D95A12", "bg": "#2A2A2A" },
         { "type": "label", "x": 16,  "y": 170, "binding": "claude.week_reset_in_sec", "format": "resets in {duration}", "font": 20, "color": "#888888" },
 
-        { "type": "label", "x": 16,  "y": 214, "binding": "clock.hhmm", "font": 20, "color": "#888888" }
+        { "type": "label", "x": 16,  "y": 214, "binding": "clock.hhmm", "font": 20, "color": "#888888" },
+
+        { "type": "bar",   "x": 0, "y": 234, "w": 320, "h": 6, "binding": "__page.pct", "min": 0, "max": 100, "color": "#2A2A2A", "bg": "#1A1A1A", "rounded": false }
       ]
     },
     {
@@ -70,13 +74,18 @@
       "transition": "fade",
       "bg": "#111111",
       "widgets": [
-        { "type": "label", "x": 160, "y": 70,  "text": "OLLAMA", "font": 24, "color": "#22C55E", "align": "center", "w": 320 },
-        { "type": "label", "x": 160, "y": 106, "text": "CLOUD",  "font": 16, "color": "#2A6640", "align": "center", "w": 320 },
-        { "type": "bar",   "x": 211, "y": 170, "w": 28, "h": 12, "color": "#22C55E", "bg": "#22C55E", "rounded": false, "blink": true, "blink_interval_ms": 530 },
+        { "type": "label", "x": 160, "y": 38,  "text": "^   ^",      "font": 24, "color": "#F5C518", "align": "center", "w": 200 },
+        { "type": "label", "x": 160, "y": 65,  "text": "(  o  o  )", "font": 20, "color": "#F5C518", "align": "center", "w": 320 },
+        { "type": "label", "x": 160, "y": 92,  "text": "v",           "font": 16, "color": "#F5C518", "align": "center", "w": 320 },
+        { "type": "label", "x": 160, "y": 118, "text": "ollama",      "font": 24, "color": "#F5C518", "align": "center", "w": 320 },
+        { "type": "label", "x": 160, "y": 147, "text": "cloud",       "font": 16, "color": "#A07C00", "align": "center", "w": 320 },
+        { "type": "bar",   "x": 211, "y": 170, "w": 28, "h": 12, "color": "#F5C518", "bg": "#F5C518", "rounded": false, "blink": true, "blink_interval_ms": 530 },
 
         { "type": "line",  "x1": 0,  "y1": 210, "x2": 320, "y2": 210, "color": "#1B1B1B", "thickness": 1 },
         { "type": "label", "x": 16,  "y": 218, "binding": "ollama.session_reset_in_sec", "format": "session {duration}", "font": 14, "color": "#888888" },
-        { "type": "label", "x": 304, "y": 218, "binding": "ollama.week_reset_in_sec",    "format": "week {duration}",    "font": 14, "color": "#888888", "align": "right" }
+        { "type": "label", "x": 304, "y": 218, "binding": "ollama.week_reset_in_sec",    "format": "week {duration}",    "font": 14, "color": "#888888", "align": "right" },
+
+        { "type": "bar",   "x": 0, "y": 234, "w": 320, "h": 6, "binding": "__page.pct", "min": 0, "max": 100, "color": "#3A2E00", "bg": "#1A1A1A", "rounded": false }
       ]
     },
     {
@@ -89,16 +98,18 @@
         { "type": "label", "x": 16,  "y": 4,   "text": "Ollama Cloud", "font": 24, "color": "#EEEEEE" },
 
         { "type": "label", "x": 16,  "y": 40,  "text": "Session",    "font": 24, "color": "#888888" },
-        { "type": "label", "x": 304, "y": 36,  "binding": "ollama.session_pct", "format": "{:.0f}%", "font": 24, "color": "#22C55E", "align": "right" },
-        { "type": "bar",   "x": 16,  "y": 68,  "w": 288, "h": 16, "binding": "ollama.session_pct", "min": 0, "max": 100, "color": "#22C55E", "bg": "#2A2A2A" },
+        { "type": "label", "x": 304, "y": 36,  "binding": "ollama.session_pct", "format": "{:.0f}%", "font": 24, "color": "#F5C518", "align": "right" },
+        { "type": "bar",   "x": 16,  "y": 68,  "w": 288, "h": 16, "binding": "ollama.session_pct", "min": 0, "max": 100, "color": "#F5C518", "bg": "#2A2A2A" },
         { "type": "label", "x": 16,  "y": 90,  "binding": "ollama.session_reset_in_sec", "format": "resets in {duration}", "font": 20, "color": "#888888" },
 
         { "type": "label", "x": 16,  "y": 120, "text": "Week",       "font": 24, "color": "#888888" },
-        { "type": "label", "x": 304, "y": 116, "binding": "ollama.week_pct", "format": "{:.0f}%", "font": 24, "color": "#22C55E", "align": "right" },
-        { "type": "bar",   "x": 16,  "y": 148, "w": 288, "h": 16, "binding": "ollama.week_pct", "min": 0, "max": 100, "color": "#22C55E", "bg": "#2A2A2A" },
+        { "type": "label", "x": 304, "y": 116, "binding": "ollama.week_pct", "format": "{:.0f}%", "font": 24, "color": "#F5C518", "align": "right" },
+        { "type": "bar",   "x": 16,  "y": 148, "w": 288, "h": 16, "binding": "ollama.week_pct", "min": 0, "max": 100, "color": "#F5C518", "bg": "#2A2A2A" },
         { "type": "label", "x": 16,  "y": 170, "binding": "ollama.week_reset_in_sec", "format": "resets in {duration}", "font": 20, "color": "#888888" },
 
-        { "type": "label", "x": 16,  "y": 214, "binding": "clock.hhmm", "font": 20, "color": "#888888" }
+        { "type": "label", "x": 16,  "y": 214, "binding": "clock.hhmm", "font": 20, "color": "#888888" },
+
+        { "type": "bar",   "x": 0, "y": 234, "w": 320, "h": 6, "binding": "__page.pct", "min": 0, "max": 100, "color": "#3A2E00", "bg": "#1A1A1A", "rounded": false }
       ]
     }
   ]

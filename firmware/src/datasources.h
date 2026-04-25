@@ -26,4 +26,8 @@ String accept_push(const String& source_id, const JsonDocument& body);
 using ChangeCb = std::function<void(const String& path)>;
 void on_change(ChangeCb cb);
 
+// Called by the renderer when a new page is displayed. Starts the __page.pct
+// counter (0→100 over duration_ms). Pass 0 to stop the counter.
+void page_started(uint32_t duration_ms);
+
 }  // namespace cydstudio::datasources

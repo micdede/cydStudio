@@ -329,6 +329,7 @@ void render_page(int idx) {
 
   // Set up auto-advance for the new page if it asked for one.
   schedule_carousel_for(idx);
+  datasources::page_started(pages[idx].auto_advance_ms);
 }
 
 // Run on the next LVGL event-loop tick — must NOT happen synchronously inside

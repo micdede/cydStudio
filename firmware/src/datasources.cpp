@@ -11,6 +11,7 @@
 #include "datasources.h"
 
 #include <Arduino.h>
+#include <lvgl.h>
 #include <set>
 #include <time.h>
 #include <vector>
@@ -41,6 +42,20 @@ void notify(const String& path) {
   for (auto& cb : change_callbacks) cb(path);
 }
 
+// --- __page.pct (carousel progress) -----------------------------------------
+static uint32_t    page_start_ms    = 0;
+static uint32_t    page_dur_ms      = 0;
+static lv_timer_t* page_pct_timer   = nullptr;
+
+static void page_pct_timer_cb(lv_timer_t*) {
+  if (page_dur_ms == 0) return;
+  uint32_t elapsed = millis() - page_start_ms;
+  int pct = (int)min(100UL, (unsigned long)elapsed * 100UL / page_dur_ms);
+  value_tree["__page"]["pct"] = pct;
+  notify("__page.pct");
+}
+// -----------------------------------------------------------------------------
+
 void apply_clock(ClockSource& c) {
   time_t now = time(nullptr);
   struct tm tm_local;
@@ -65,6 +80,7 @@ void configure(JsonArrayConst sources) {
   push_sources.clear();
   clock_sources.clear();
   value_tree.clear();
+  value_tree["__page"]["pct"] = 0;
 
   for (JsonObjectConst s : sources) {
     const char* type = s["type"];
@@ -155,6 +171,16 @@ String accept_push(const String& source_id, const JsonDocument& body) {
 
 void on_change(ChangeCb cb) {
   change_callbacks.push_back(std::move(cb));
+}
+
+void page_started(uint32_t duration_ms) {
+  if (page_pct_timer) { lv_timer_del(page_pct_timer); page_pct_timer = nullptr; }
+  page_start_ms = millis();
+  page_dur_ms   = duration_ms;
+  value_tree["__page"]["pct"] = 0;
+  notify("__page.pct");
+  if (duration_ms > 0)
+    page_pct_timer = lv_timer_create(page_pct_timer_cb, 500, nullptr);
 }
 
 }  // namespace cydstudio::datasources
