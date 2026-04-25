@@ -49,7 +49,7 @@ final class AISettings {
         self.kind = kind
         self.baseURL = UserDefaults.standard.string(forKey: "ai.baseURL.\(kind.rawValue)") ?? Self.defaultBaseURL(kind)
         self.model   = UserDefaults.standard.string(forKey: "ai.model.\(kind.rawValue)")   ?? Self.defaultModel(kind)
-        self.apiKey  = Keychain.get(account: kind.rawValue)
+        self.apiKey  = Keychain.get(account: kind.rawValue).trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     /// Switch to a new provider, loading its persisted base URL/model/key.
@@ -66,11 +66,12 @@ final class AISettings {
         guard let url = URL(string: baseURL) else {
             throw AIError.decoding("invalid base URL: \(baseURL)")
         }
+        let key = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
         switch kind {
         case .anthropic:
-            return AnthropicProvider(baseURL: url, model: model, apiKey: apiKey)
+            return AnthropicProvider(baseURL: url, model: model, apiKey: key)
         case .openai:
-            return OpenAICompatibleProvider(baseURL: url, model: model, apiKey: apiKey)
+            return OpenAICompatibleProvider(baseURL: url, model: model, apiKey: key)
         case .ollama:
             return OllamaProvider(baseURL: url, model: model)
         }
