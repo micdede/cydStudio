@@ -467,20 +467,38 @@ String apply_layout(const JsonDocument& doc) {
   return "";
 }
 
+// NVS strings are capped at ~3800 bytes; split larger layouts into chunks.
+static const int NVS_CHUNK = 3800;
+
 void persist_active() {
   if (active_doc.isNull()) return;
   String s;
   serializeJson(active_doc, s);
   Preferences p;
   p.begin("cydlayout", false);
-  p.putString("layout", s);
+  p.clear();
+  int n = (s.length() + NVS_CHUNK - 1) / NVS_CHUNK;
+  p.putInt("n", n);
+  for (int i = 0; i < n; i++) {
+    char key[6]; snprintf(key, sizeof(key), "l%d", i);
+    p.putString(key, s.substring(i * NVS_CHUNK, min((i + 1) * NVS_CHUNK, (int)s.length())));
+  }
   p.end();
 }
 
 bool load_persisted() {
   Preferences p;
   p.begin("cydlayout", true);
-  String s = p.getString("layout", "");
+  int n = p.getInt("n", 0);
+  String s;
+  if (n == 0) {
+    s = p.getString("layout", "");  // legacy single-key format
+  } else {
+    for (int i = 0; i < n; i++) {
+      char key[6]; snprintf(key, sizeof(key), "l%d", i);
+      s += p.getString(key, "");
+    }
+  }
   p.end();
   if (s.length() == 0) return false;
   JsonDocument doc;

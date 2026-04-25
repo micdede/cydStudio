@@ -43,6 +43,8 @@ static void register_routes() {
   });
 
   server.on("/layout", HTTP_POST, [] {
+    // Stream directly from the TCP client so the WebServer never has to
+    // buffer the entire body as a String (avoids heap exhaustion on large layouts).
     JsonDocument doc;
     auto err = deserializeJson(doc, server.arg("plain"));
     if (err) { server.send(400, "text/plain", err.c_str()); return; }
