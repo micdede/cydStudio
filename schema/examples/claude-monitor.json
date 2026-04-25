@@ -21,7 +21,8 @@
   "pages": [
     {
       "id": "active",
-      "show_when": "!claude.__stale",
+      "auto_advance_sec": 120,
+      "transition": "fade",
       "rotation": 90,
       "bg": "#111111",
       "widgets": [
@@ -42,7 +43,8 @@
     },
     {
       "id": "idle",
-      "show_when": "claude.__stale",
+      "auto_advance_sec": 120,
+      "transition": "fade",
       "bg": "#111111",
       "widgets": [
         { "type": "image", "x": 0, "y": 28, "src": "builtin:claude-logo" },
