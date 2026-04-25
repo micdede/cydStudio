@@ -2,7 +2,7 @@
 
 SwiftUI-based controller for cydStudio devices on your local network.
 
-Phase 2 scope (this version):
+Phase 2+3 scope (this version):
 
 - **Device discovery** via Bonjour (`_cydstudio._tcp`) — all reachable devices
   show up in the sidebar automatically as soon as the firmware joins WiFi
@@ -10,9 +10,40 @@ Phase 2 scope (this version):
   are bundled into the app)
 - **Push** the current editor contents to the selected device via `POST /layout`
 - **Status banner** with the last-push outcome and any error returned by the device
+- **Add Device** flow: pick USB port → flash bundled firmware via esptool →
+  enter WiFi credentials → app sends them over the same USB cable, the
+  device joins your network and appears in the sidebar
 
 Future phases will add: drag-and-drop designer, AI prompt-to-layout,
-flasher / first-boot provisioning, multi-page layouts.
+multi-page layouts, bundled esptool binary so no Python install is needed.
+
+## Adding a new device (Phase 3)
+
+1. Plug your CYD into USB. Wait a couple of seconds for macOS to mount the
+   USB-Serial device (you'll see `/dev/cu.usbserial-XXXX`).
+2. Click the `+` button in the sidebar to open the **Add Device** sheet.
+3. Pick the serial port and the board profile (only `cyd-2432s028` is
+   shipped right now; more profiles arrive in Phase 5).
+4. Click **Flash**. You'll see esptool's progress bar.
+5. After the flash, fill in WiFi SSID + password + a hostname (e.g.
+   `kitchen-monitor`) and an optional OTA password.
+6. Click **Send**. The app writes the credentials over the same USB cable,
+   the device persists them and reboots, joins your network, and appears
+   in the sidebar.
+
+### Prerequisites
+
+- `esptool.py` reachable. The app looks under `~/.platformio/packages/tool-esptoolpy/`
+  first (you have it if PlatformIO is installed) and falls back to PATH.
+  If you don't have either, install with:
+  ```
+  pip3 install esptool
+  ```
+- A bundled firmware image at
+  `Sources/CydStudio/Resources/firmware/<board>.bin`. Re-generate via:
+  ```
+  scripts/build_firmware_image.sh cyd-2432s028
+  ```
 
 ## Run from source
 

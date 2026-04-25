@@ -22,6 +22,7 @@ let package = Package(
             resources: [
                 .copy("Resources/examples"),
                 .copy("Resources/schema"),
+                .copy("Resources/firmware"),
             ]
         )
     ]

@@ -22,6 +22,7 @@
 #include "display.h"
 #include "provisioning.h"
 #include "renderer.h"
+#include "serial_provision.h"
 #include "settings.h"
 
 static WebServer   server(80);
@@ -64,6 +65,11 @@ static void register_routes() {
 
 void setup() {
   Serial.begin(115200);
+  // Listen briefly on Serial for a host-provided PROVISION line. Used by
+  // the Mac app right after a USB flash so the user never has to do the
+  // SoftAP dance. Cheap (~3s) and only blocks before any hardware init.
+  cydstudio::serial_provision::run(/*timeout_ms=*/3000);
+
   cydstudio::display::init(cydstudio::settings::get_rotation());
   cydstudio::display::test_pattern(cydstudio::display::board_id());
 

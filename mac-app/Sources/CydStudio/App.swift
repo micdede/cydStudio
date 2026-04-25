@@ -20,11 +20,19 @@ struct CydStudioApp: App {
 struct ContentView: View {
     @Environment(DeviceRegistry.self) private var registry
     @State private var selection: Device.ID?
+    @State private var showingAddDevice = false
 
     var body: some View {
         NavigationSplitView {
             DeviceListView(selection: $selection)
                 .navigationSplitViewColumnWidth(min: 220, ideal: 260)
+                .toolbar {
+                    ToolbarItem {
+                        Button { showingAddDevice = true } label: {
+                            Label("Add Device", systemImage: "plus")
+                        }
+                    }
+                }
         } detail: {
             if let id = selection, let device = registry.device(id: id) {
                 DesignerView(device: device)
@@ -32,9 +40,12 @@ struct ContentView: View {
                 ContentUnavailableView(
                     "No device selected",
                     systemImage: "display",
-                    description: Text("Pick a discovered cydStudio device from the sidebar to push a layout.")
+                    description: Text("Pick a discovered cydStudio device from the sidebar to push a layout, or use + to flash a new one.")
                 )
             }
+        }
+        .sheet(isPresented: $showingAddDevice) {
+            AddDeviceView()
         }
     }
 }
