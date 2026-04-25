@@ -35,12 +35,33 @@ enum BoardCatalog {
     static let all: [BoardProfile] = [
         BoardProfile(
             id: "cyd-2432s028",
-            displayName: "ESP32-2432S028 (CYD)",
+            displayName: "ESP32-2432S028 (CYD) — 240×320",
             chip: .esp32,
             imageResourceName: "cyd-2432s028",
             usbHints: ["usbserial", "wchusbserial", "SLAB_USBtoUART"]
         ),
-        // Future boards: add when the corresponding firmware/src/boards/<name>.h lands.
+        BoardProfile(
+            id: "t-display",
+            displayName: "LILYGO T-Display — 135×240",
+            chip: .esp32,
+            imageResourceName: "t-display",
+            usbHints: ["SLAB_USBtoUART", "usbserial"]
+        ),
+        BoardProfile(
+            id: "t-display-s3",
+            displayName: "LILYGO T-Display S3 — 170×320",
+            chip: .esp32s3,
+            imageResourceName: "t-display-s3",
+            usbHints: ["usbmodem"]
+        ),
+        BoardProfile(
+            id: "t-qt-pro",
+            displayName: "LILYGO T-QT Pro — 128×128",
+            chip: .esp32s3,
+            imageResourceName: "t-qt-pro",
+            usbHints: ["usbmodem"]
+        ),
+        // T-Display S3 AMOLED pending — needs LovyanGFX integration.
     ]
 
     static func profile(id: String) -> BoardProfile? {

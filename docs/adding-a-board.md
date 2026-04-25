@@ -59,3 +59,18 @@ In `mac-app/Sources/Flasher/BoardCatalog.swift`, add an entry with the board ID,
 ## CI builds the image
 
 When you push your board profile, GitHub Actions builds the corresponding firmware `.bin` and attaches it to the next release. The Mac app downloads images on first launch and caches them.
+
+## Status of currently shipped profiles
+
+| Board | Status |
+|---|---|
+| `cyd-2432s028` | **Verified on hardware** — original target, well-tested |
+| `t-display` | **Phase 5, unverified** — pin map from TFT_eSPI Setup25 reference |
+| `t-display-s3` | **Phase 5, unverified** — 8-bit parallel, pins from LILYGO sample sketches |
+| `t-qt-pro` | **Phase 5, unverified** — uses `GC9A01_DRIVER` as a best-effort proxy for the GC9107; rendering may need MADCTL tweaks |
+| `t-display-s3-amoled` | **Pending** — needs LovyanGFX + a workaround for the LovyanGFX-bundles-its-own-LVGL-fonts link conflict |
+
+If you flash a "Phase 5, unverified" profile and the test pattern looks
+wrong (mirrored, off-position, garbage colors), the offsets or RGB-order
+flags in `firmware/platformio.ini` need adjusting for your specific board
+revision. Open an issue with a photo and your board's purchase link.
