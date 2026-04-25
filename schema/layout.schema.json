@@ -4,25 +4,32 @@
   "title": "cydStudio Layout",
   "description": "A complete screen layout pushed to a cydStudio firmware device. The device renders the layout with LVGL and subscribes its widgets to the named datasources.",
   "type": "object",
-  "required": ["schema_version", "page", "widgets"],
+  "required": ["schema_version"],
   "additionalProperties": false,
   "properties": {
     "schema_version": {
       "type": "string",
-      "const": "0.1",
-      "description": "Schema version this layout targets. Firmware refuses unknown versions."
+      "enum": ["0.1", "0.2"],
+      "description": "Schema version. 0.2 adds pages[] for multi-screen layouts; 0.1 single-page layouts still parse (the firmware treats top-level widgets as a single implicit page)."
     },
     "name": {
       "type": "string",
       "description": "Human-readable name for the layout (shown in the Mac app)."
     },
     "page": {
-      "$ref": "#/$defs/page"
+      "$ref": "#/$defs/page",
+      "description": "(0.1) Page-level styling for single-page layouts. Ignored when pages[] is present."
     },
     "widgets": {
       "type": "array",
-      "description": "Widgets are drawn in array order; later widgets sit on top of earlier ones.",
+      "description": "(0.1) Widgets for single-page layouts. Ignored when pages[] is present. Widgets are drawn in array order; later widgets sit on top of earlier ones.",
       "items": { "$ref": "#/$defs/widget" }
+    },
+    "pages": {
+      "type": "array",
+      "description": "(0.2) Multiple screens. The firmware shows the first page whose show_when expression is truthy (or the first one if none has a show_when).",
+      "items": { "$ref": "#/$defs/page_with_widgets" },
+      "minItems": 1
     },
     "datasources": {
       "type": "array",
@@ -50,6 +57,28 @@
           "type": "integer",
           "enum": [0, 90, 180, 270],
           "description": "Display rotation in degrees. Defaults to the board's natural orientation."
+        }
+      }
+    },
+    "page_with_widgets": {
+      "type": "object",
+      "required": ["id", "widgets"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "description": "Stable identifier for the page; used in logs." },
+        "show_when": {
+          "type": "string",
+          "description": "Boolean expression over bindings. The firmware shows the first page whose expression evaluates true; an empty expression always matches."
+        },
+        "bg": { "$ref": "#/$defs/color" },
+        "rotation": {
+          "type": "integer",
+          "enum": [0, 90, 180, 270],
+          "description": "Per-layout rotation. Mixing rotations across pages of the same layout is not supported (the rotation set on the first page wins)."
+        },
+        "widgets": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/widget" }
         }
       }
     },
@@ -103,7 +132,16 @@
           "description": "Montserrat font size. Larger sizes cost more flash."
         },
         "align": { "type": "string", "enum": ["left", "center", "right"] },
-        "hidden_when": { "type": "string" }
+        "hidden_when": { "type": "string" },
+        "blink": {
+          "type": "boolean",
+          "description": "If true, the label's visibility toggles on a fixed interval — useful for terminal-style cursors."
+        },
+        "blink_interval_ms": {
+          "type": "integer",
+          "default": 530,
+          "description": "Toggle interval for blink. Default approximates a typical terminal cursor."
+        }
       }
     },
     "widget_bar": {

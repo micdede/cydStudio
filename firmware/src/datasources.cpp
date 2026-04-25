@@ -49,13 +49,14 @@ void apply_clock(ClockSource& c) {
   strftime(hhmm, sizeof(hhmm), "%H:%M", &tm_local);
   char hhmmss[12];
   strftime(hhmmss, sizeof(hhmmss), "%H:%M:%S", &tm_local);
-  auto obj = value_tree[c.id].to<JsonObject>();
-  if (String(hhmm) != obj["hhmm"].as<String>()) {
-    obj["hhmm"] = String(hhmm);
-    notify(c.id + ".hhmm");
-  }
-  obj["hhmmss"] = String(hhmmss);
-  obj["epoch"]  = (uint32_t)now;
+  // Direct field assignment — DON'T use .to<JsonObject>() because that wipes
+  // every existing key in this sub-object on each tick (the bug that caused
+  // bound widgets to briefly read `null` between wipe and re-set).
+  String prev = value_tree[c.id]["hhmm"].as<String>();
+  value_tree[c.id]["hhmm"]   = String(hhmm);
+  value_tree[c.id]["hhmmss"] = String(hhmmss);
+  value_tree[c.id]["epoch"]  = (uint32_t)now;
+  if (String(hhmm) != prev) notify(c.id + ".hhmm");
 }
 
 }  // namespace

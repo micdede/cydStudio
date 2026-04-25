@@ -103,6 +103,10 @@ void setup() {
   while (WiFi.status() != WL_CONNECTED && millis() - t0 < 30000) { delay(250); }
   if (WiFi.status() == WL_CONNECTED) {
     Serial.printf("[wifi] %s\n", WiFi.localIP().toString().c_str());
+    // Kick off SNTP so the internal clock datasource has a real time to read.
+    // The TZ string comes from each clock datasource's config; here we only
+    // start the sync.
+    configTime(0, 0, "pool.ntp.org", "time.cloudflare.com");
     MDNS.begin(cfg.hostname.c_str());
     MDNS.addService("cydstudio", "tcp", 80);
 
