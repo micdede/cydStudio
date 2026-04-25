@@ -2,7 +2,7 @@
 
 SwiftUI-based controller for cydStudio devices on your local network.
 
-Phase 2+3 scope (this version):
+Phase 2+3+4 scope (this version):
 
 - **Device discovery** via Bonjour (`_cydstudio._tcp`) — all reachable devices
   show up in the sidebar automatically as soon as the firmware joins WiFi
@@ -13,6 +13,9 @@ Phase 2+3 scope (this version):
 - **Add Device** flow: pick USB port → flash bundled firmware via esptool →
   enter WiFi credentials → app sends them over the same USB cable, the
   device joins your network and appears in the sidebar
+- **AI prompt-to-layout**: describe what you want in plain language; the
+  active provider returns a JSON layout that drops straight into the editor
+  (Anthropic / OpenAI-compatible / local Ollama; pick in the AI Provider sheet)
 
 Future phases will add: drag-and-drop designer, AI prompt-to-layout,
 multi-page layouts, bundled esptool binary so no Python install is needed.
@@ -44,6 +47,28 @@ multi-page layouts, bundled esptool binary so no Python install is needed.
   ```
   scripts/build_firmware_image.sh cyd-2432s028
   ```
+
+## AI prompt-to-layout (Phase 4)
+
+Click the sparkle icon in the toolbar to open **AI Provider** settings:
+
+- **Anthropic** — the default. Set your API key from
+  https://console.anthropic.com. Default model: `claude-opus-4-7`.
+- **OpenAI-compatible** — works against the real OpenAI API or anything that
+  speaks the same wire format (OpenRouter, Groq, Together, LM Studio).
+  Set base URL + key + model.
+- **Ollama** — local server, no key needed. Default `http://localhost:11434`,
+  default model `llama3.2`. Smaller local models will struggle to produce
+  schema-correct JSON; an 8B+ model is the practical floor.
+
+API keys live in the macOS Keychain (`com.dedecke.cydstudio.aikeys`),
+not in UserDefaults.
+
+Once configured, type a prompt in the Designer's prompt bar
+("Wetterstation für Berlin", "BTC price + RSI gauge", etc.) and click
+**Generate**. The app sends the layout schema + a reference example +
+your prompt, gets back JSON, validates it parses, and drops it into the
+editor. Click **Push layout** to send it to the device.
 
 ## Run from source
 

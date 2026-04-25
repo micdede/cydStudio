@@ -13,6 +13,11 @@ struct DesignerView: View {
         VStack(spacing: 0) {
             header
             Divider()
+            AIGenerateBar(editorText: $jsonText,
+                          boardWidth: 320, boardHeight: 240)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+            Divider()
             editor
             Divider()
             statusBar

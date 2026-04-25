@@ -3,22 +3,33 @@ import SwiftUI
 @main
 struct CydStudioApp: App {
     @State private var registry = DeviceRegistry()
+    @State private var aiSettings = AISettings()
+    @State private var showingAISettings = false
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(showingAISettings: $showingAISettings)
                 .environment(registry)
+                .environment(aiSettings)
                 .frame(minWidth: 900, minHeight: 600)
+                .sheet(isPresented: $showingAISettings) {
+                    AISettingsView().environment(aiSettings)
+                }
         }
         .windowResizability(.contentSize)
         .commands {
             CommandGroup(replacing: .newItem) { }
+            CommandGroup(after: .appSettings) {
+                Button("AI Provider…") { showingAISettings = true }
+                    .keyboardShortcut(",", modifiers: [.command, .shift])
+            }
         }
     }
 }
 
 struct ContentView: View {
     @Environment(DeviceRegistry.self) private var registry
+    @Binding var showingAISettings: Bool
     @State private var selection: Device.ID?
     @State private var showingAddDevice = false
 
@@ -30,6 +41,11 @@ struct ContentView: View {
                     ToolbarItem {
                         Button { showingAddDevice = true } label: {
                             Label("Add Device", systemImage: "plus")
+                        }
+                    }
+                    ToolbarItem {
+                        Button { showingAISettings = true } label: {
+                            Label("AI Provider", systemImage: "sparkles")
                         }
                     }
                 }
