@@ -30,19 +30,33 @@ SOURCES = [
     {
         "name": "ollama_logo",
         "src":  ROOT / "assets" / "ollama_logo.png",
-        "max_w": 280,
-        "max_h": 185,
-        # Pixel-art logo: remap bright pixels → sunflower yellow, dark → bg.
-        "colorize_fg": (245, 197, 24),   # #F5C518
-        "colorize_bg": (17,  17,  17),   # #111111
-        "colorize_threshold": 100,
+        "max_w": 200,
+        "max_h": 200,
+        # RGBA logo: opaque pixels → sunflower yellow, transparent → bg.
+        "colorize_alpha_fg": (245, 197, 24),   # #F5C518
+        "colorize_alpha_bg": (17,  17,  17),   # #111111
+        "colorize_alpha_threshold": 128,
     },
 ]
 
 
 def convert(spec: dict) -> None:
-    img = Image.open(spec["src"]).convert("RGB")
-    img.thumbnail((spec["max_w"], spec["max_h"]), Image.LANCZOS)
+    raw = Image.open(spec["src"])
+    if spec.get("colorize_alpha_fg") and raw.mode == "RGBA":
+        fg  = spec["colorize_alpha_fg"]
+        bg  = spec.get("colorize_alpha_bg", (0, 0, 0))
+        thr = spec.get("colorize_alpha_threshold", 128)
+        raw.thumbnail((spec["max_w"], spec["max_h"]), Image.LANCZOS)
+        img = Image.new("RGB", raw.size, bg)
+        px_src = raw.load()
+        px_dst = img.load()
+        for y in range(raw.height):
+            for x in range(raw.width):
+                r, g, b, a = px_src[x, y]
+                px_dst[x, y] = fg if a >= thr else bg
+    else:
+        img = raw.convert("RGB")
+        img.thumbnail((spec["max_w"], spec["max_h"]), Image.LANCZOS)
     if spec.get("saturation"):
         img = ImageEnhance.Color(img).enhance(spec["saturation"])
     if spec.get("contrast"):
