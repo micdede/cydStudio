@@ -1,7 +1,20 @@
+import AppKit
 import SwiftUI
+
+/// SPM-built SwiftUI apps default to accessory activation policy, which
+/// means no Dock icon, no menu-bar focus, and — critically — TextField/
+/// SecureField never receive keyboard input. Force regular foreground-app
+/// behavior on launch.
+final class CydStudioAppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+}
 
 @main
 struct CydStudioApp: App {
+    @NSApplicationDelegateAdaptor(CydStudioAppDelegate.self) private var appDelegate
     @State private var registry = DeviceRegistry()
     @State private var aiSettings = AISettings()
     @State private var showingAISettings = false
