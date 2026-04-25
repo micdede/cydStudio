@@ -22,4 +22,9 @@ bool load_persisted();
 // to free DMA buffers.
 void shutdown();
 
+// True if a layout push asked for a setting that requires a reboot (e.g. a
+// rotation change). main.cpp checks this each loop and calls ESP.restart()
+// once enough time has passed for the HTTP response to flush.
+bool pending_restart();
+
 }  // namespace cydstudio::renderer

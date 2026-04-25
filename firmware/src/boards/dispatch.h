@@ -1,17 +1,21 @@
 /**
- * Board dispatcher — picks the right LovyanGFX device class based on the
- * CYDSTUDIO_BOARD_* macro set by platformio.ini. Adding a board: drop a
- * new boards/<board>.h, then add a clause here.
+ * Board dispatcher — picks the right device class based on the
+ * CYDSTUDIO_BOARD_* macro set by platformio.ini.
+ *
+ * Two adapter shapes:
+ *   - BoardDeviceTFT:     thin wrapper over TFT_eSPI (most boards)
+ *   - BoardDeviceLGFX:    thin wrapper over LovyanGFX (AMOLED only)
+ *
+ * Both expose the same minimal API (see display.cpp for the calls actually used).
  */
 #pragma once
 
 #if defined(CYDSTUDIO_BOARD_CYD_2432S028) || defined(CYDSTUDIO_BOARD_CYD_2432S028R)
   #include "cyd_2432s028.h"
-  using BoardDisplay = Board_CYD_2432S028;
+  using BoardDisplay = BoardDeviceTFT;
   static constexpr const char* BOARD_ID = "cyd-2432s028";
 
 #elif defined(CYDSTUDIO_BOARD_LILYGO_T_DISPLAY)
-  // TODO: implement board profile
   #error "T-Display board profile not yet implemented (boards/t_display.h)"
 
 #elif defined(CYDSTUDIO_BOARD_LILYGO_T_DISPLAY_S3)

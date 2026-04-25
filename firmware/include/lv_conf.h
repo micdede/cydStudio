@@ -13,7 +13,7 @@
 
 /* ---- Memory ---- */
 #define LV_MEM_CUSTOM 0
-#define LV_MEM_SIZE (96U * 1024U)
+#define LV_MEM_SIZE (64U * 1024U)
 
 /* ---- HAL ---- */
 #define LV_DISP_DEF_REFR_PERIOD 30
@@ -37,8 +37,8 @@
 #define LV_FONT_MONTSERRAT_16 1
 #define LV_FONT_MONTSERRAT_20 1
 #define LV_FONT_MONTSERRAT_24 1
-#define LV_FONT_MONTSERRAT_32 1
-#define LV_FONT_MONTSERRAT_48 1
+#define LV_FONT_MONTSERRAT_32 0
+#define LV_FONT_MONTSERRAT_48 0
 #define LV_FONT_DEFAULT &lv_font_montserrat_14
 
 /* ---- Widgets ---- */

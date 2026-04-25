@@ -27,5 +27,5 @@ venv/
 .vscode/
 *.swp
 
-# Generated assets (regenerable from source)
-firmware/src/assets/generated/
+# Generated assets are committed so the firmware builds out-of-the-box.
+# Regenerate with: python3 scripts/convert_image.py
