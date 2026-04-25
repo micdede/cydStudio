@@ -13,10 +13,12 @@
 
 // Forward decl — definitions live in src/assets/generated/*.c
 extern const lv_img_dsc_t claude_logo_dsc;
+extern const lv_img_dsc_t ollama_logo_dsc;
 
 struct Entry { const char* name; const lv_img_dsc_t* dsc; };
 static const Entry kBuiltins[] = {
   { "claude-logo", &claude_logo_dsc },
+  { "ollama-logo", &ollama_logo_dsc },
 };
 
 const lv_img_dsc_t* lookup_builtin_image(const char* name) {

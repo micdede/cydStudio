@@ -27,6 +27,16 @@ SOURCES = [
         "contrast": 1.1,
         "brightness": 0.85,
     },
+    {
+        "name": "ollama_logo",
+        "src":  ROOT / "assets" / "ollama_logo.png",
+        "max_w": 280,
+        "max_h": 185,
+        # Pixel-art logo: remap bright pixels → sunflower yellow, dark → bg.
+        "colorize_fg": (245, 197, 24),   # #F5C518
+        "colorize_bg": (17,  17,  17),   # #111111
+        "colorize_threshold": 100,
+    },
 ]
 
 
@@ -39,6 +49,16 @@ def convert(spec: dict) -> None:
         img = ImageEnhance.Contrast(img).enhance(spec["contrast"])
     if spec.get("brightness"):
         img = ImageEnhance.Brightness(img).enhance(spec["brightness"])
+    if spec.get("colorize_fg"):
+        fg  = spec["colorize_fg"]
+        bg  = spec.get("colorize_bg", (0, 0, 0))
+        thr = spec.get("colorize_threshold", 128)
+        px  = img.load()
+        w0, h0 = img.size
+        for y in range(h0):
+            for x in range(w0):
+                r, g, b = px[x, y]
+                px[x, y] = fg if (r + g + b) / 3 > thr else bg
     w, h = img.size
 
     data = bytearray()
