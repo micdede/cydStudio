@@ -180,11 +180,15 @@ void build_bar(JsonObjectConst spec, lv_obj_t* parent) {
   float mn = spec["min"] | 0.0f, mx = spec["max"] | 100.0f;
   lv_bar_set_range(bar, (int)mn, (int)mx);
   lv_obj_set_style_bg_color(bar, hex(spec["bg"], lv_color_hex(0x2A2A2A)), LV_PART_MAIN);
+  lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, LV_PART_MAIN);
   lv_obj_set_style_bg_color(bar, hex(spec["color"], lv_color_hex(0xD95A12)), LV_PART_INDICATOR);
+  lv_obj_set_style_bg_opa(bar, LV_OPA_COVER, LV_PART_INDICATOR);
   if (!(spec["rounded"] | true)) {
     lv_obj_set_style_radius(bar, 0, LV_PART_MAIN);
     lv_obj_set_style_radius(bar, 0, LV_PART_INDICATOR);
   }
+  // Bar without a binding: fill fully so the indicator color shows solid.
+  if ((spec["binding"] | "") == "") lv_bar_set_value(bar, (int)mx, LV_ANIM_OFF);
 
   BoundWidget w;
   w.obj         = bar;
