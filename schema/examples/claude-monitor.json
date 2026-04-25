@@ -20,6 +20,20 @@
   ],
   "pages": [
     {
+      "id": "idle",
+      "auto_advance_sec": 120,
+      "transition": "fade",
+      "bg": "#111111",
+      "widgets": [
+        { "type": "image", "x": 0, "y": 28, "src": "builtin:claude-logo" },
+        { "type": "label", "x": 211, "y": 173, "text": "_", "font": 24, "color": "#D95A12", "blink": true, "blink_interval_ms": 530 },
+
+        { "type": "line",  "x1": 0,  "y1": 210, "x2": 320, "y2": 210, "color": "#1B1B1B", "thickness": 1 },
+        { "type": "label", "x": 16,  "y": 218, "binding": "claude.session_reset_in_sec", "format": "session {duration}", "font": 14, "color": "#888888" },
+        { "type": "label", "x": 304, "y": 218, "binding": "claude.week_reset_in_sec",    "format": "week {duration}",    "font": 14, "color": "#888888", "align": "right" }
+      ]
+    },
+    {
       "id": "active",
       "auto_advance_sec": 120,
       "transition": "fade",
@@ -39,20 +53,6 @@
         { "type": "label", "x": 16,  "y": 176, "binding": "claude.week_reset_in_sec", "format": "resets in {duration}", "font": 12, "color": "#888888" },
 
         { "type": "label", "x": 16,  "y": 222, "binding": "clock.hhmm", "font": 14, "color": "#888888" }
-      ]
-    },
-    {
-      "id": "idle",
-      "auto_advance_sec": 120,
-      "transition": "fade",
-      "bg": "#111111",
-      "widgets": [
-        { "type": "image", "x": 0, "y": 28, "src": "builtin:claude-logo" },
-        { "type": "label", "x": 211, "y": 173, "text": "_", "font": 24, "color": "#D95A12", "blink": true, "blink_interval_ms": 530 },
-
-        { "type": "line",  "x1": 0,  "y1": 210, "x2": 320, "y2": 210, "color": "#1B1B1B", "thickness": 1 },
-        { "type": "label", "x": 16,  "y": 218, "binding": "claude.session_reset_in_sec", "format": "session {duration}", "font": 14, "color": "#888888" },
-        { "type": "label", "x": 304, "y": 218, "binding": "claude.week_reset_in_sec",    "format": "week {duration}",    "font": 14, "color": "#888888", "align": "right" }
       ]
     }
   ]
