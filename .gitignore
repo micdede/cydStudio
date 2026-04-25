@@ -1,0 +1,31 @@
+# PlatformIO
+firmware/.pio/
+firmware/.vscode/
+firmware/include/secrets.h
+firmware/include/credentials.h
+
+# Xcode / SwiftUI
+mac-app/build/
+mac-app/DerivedData/
+mac-app/.swiftpm/
+mac-app/*.xcuserstate
+mac-app/**/xcuserdata/
+mac-app/**/*.xcworkspace/xcuserdata/
+
+# Python (asset / build scripts)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# macOS
+.DS_Store
+._*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Generated assets (regenerable from source)
+firmware/src/assets/generated/

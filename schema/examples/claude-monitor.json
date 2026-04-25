@@ -1,0 +1,38 @@
+{
+  "schema_version": "0.1",
+  "name": "Claude Code Monitor",
+  "page": { "bg": "#111111" },
+  "datasources": [
+    {
+      "id": "claude",
+      "type": "push",
+      "stale_after_sec": 600,
+      "fields": [
+        "session_pct", "session_reset_in_sec", "session_valid",
+        "week_pct", "week_reset_in_sec", "week_valid"
+      ]
+    },
+    {
+      "id": "clock",
+      "type": "internal",
+      "source": "clock",
+      "tz": "CET-1CEST,M3.5.0,M10.5.0/3"
+    }
+  ],
+  "widgets": [
+    { "type": "label", "x": 16, "y": 8, "text": "Claude Code", "font": 24, "color": "#EEEEEE" },
+    { "type": "label", "x": 16, "y": 38, "text": "Session", "font": 16, "color": "#888888" },
+    { "type": "label", "x": 230, "y": 38, "binding": "claude.session_pct", "format": "{:.0f}%", "font": 20, "color": "#D95A12", "align": "right" },
+    { "type": "bar", "x": 16, "y": 64, "w": 288, "h": 14, "binding": "claude.session_pct", "min": 0, "max": 100, "color": "#D95A12", "bg": "#2A2A2A" },
+    { "type": "label", "x": 16, "y": 84, "binding": "claude.session_reset_in_sec", "format": "resets in {duration}", "font": 12, "color": "#888888" },
+
+    { "type": "label", "x": 16, "y": 118, "text": "Week", "font": 16, "color": "#888888" },
+    { "type": "label", "x": 230, "y": 118, "binding": "claude.week_pct", "format": "{:.0f}%", "font": 20, "color": "#D95A12", "align": "right" },
+    { "type": "bar", "x": 16, "y": 144, "w": 288, "h": 14, "binding": "claude.week_pct", "min": 0, "max": 100, "color": "#D95A12", "bg": "#2A2A2A" },
+    { "type": "label", "x": 16, "y": 164, "binding": "claude.week_reset_in_sec", "format": "resets in {duration}", "font": 12, "color": "#888888" },
+
+    { "type": "label", "x": 16, "y": 200, "binding": "claude.session_valid", "text": "waiting for Claude Code…", "hidden_when": "claude.session_valid", "font": 14, "color": "#888888" },
+
+    { "type": "label", "x": 16, "y": 304, "binding": "clock.hhmm", "font": 14, "color": "#888888" }
+  ]
+}
