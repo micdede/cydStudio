@@ -192,6 +192,10 @@ void build_bar(JsonObjectConst spec, lv_obj_t* parent) {
   w.binding     = String(spec["binding"]     | "");
   w.hidden_when = String(spec["hidden_when"] | "");
   w.min = mn; w.max = mx;
+  if (spec["blink"] | false) {
+    int interval = spec["blink_interval_ms"] | 530;
+    w.blink_timer = lv_timer_create(blink_timer_cb, interval, bar);
+  }
   bound_widgets.push_back(w);
   update_widget_value(bound_widgets.back());
 }
