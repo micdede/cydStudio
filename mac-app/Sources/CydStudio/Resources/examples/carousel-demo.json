@@ -1,0 +1,43 @@
+{
+  "schema_version": "0.2",
+  "name": "Carousel demo (auto-advance)",
+  "datasources": [
+    { "id": "clock", "type": "internal", "source": "clock", "tz": "CET-1CEST,M3.5.0,M10.5.0/3" }
+  ],
+  "pages": [
+    {
+      "id": "one",
+      "auto_advance_sec": 5,
+      "transition": "slide_left",
+      "rotation": 90,
+      "bg": "#101820",
+      "widgets": [
+        { "type": "label", "x": 16, "y": 16,  "text": "Page 1",          "font": 24, "color": "#FFFFFF" },
+        { "type": "label", "x": 16, "y": 60,  "text": "5s · slide left", "font": 14, "color": "#888888" },
+        { "type": "label", "x": 16, "y": 210, "binding": "clock.hhmm",   "font": 14, "color": "#888888" }
+      ]
+    },
+    {
+      "id": "two",
+      "auto_advance_sec": 8,
+      "transition": "fade",
+      "bg": "#1B1B1B",
+      "widgets": [
+        { "type": "label", "x": 16, "y": 16,  "text": "Page 2",   "font": 24, "color": "#D95A12" },
+        { "type": "label", "x": 16, "y": 60,  "text": "8s · fade","font": 14, "color": "#888888" },
+        { "type": "label", "x": 16, "y": 210, "binding": "clock.hhmm", "font": 14, "color": "#888888" }
+      ]
+    },
+    {
+      "id": "three",
+      "auto_advance_sec": 3,
+      "transition": "slide_up",
+      "bg": "#0a3d0a",
+      "widgets": [
+        { "type": "label", "x": 16, "y": 16,  "text": "Page 3",       "font": 24, "color": "#88FF88" },
+        { "type": "label", "x": 16, "y": 60,  "text": "3s · slide up","font": 14, "color": "#888888" },
+        { "type": "label", "x": 16, "y": 210, "binding": "clock.hhmm","font": 14, "color": "#888888" }
+      ]
+    }
+  ]
+}

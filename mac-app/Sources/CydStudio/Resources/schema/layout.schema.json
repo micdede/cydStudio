@@ -68,7 +68,18 @@
         "id": { "type": "string", "description": "Stable identifier for the page; used in logs." },
         "show_when": {
           "type": "string",
-          "description": "Boolean expression over bindings. The firmware shows the first page whose expression evaluates true; an empty expression always matches."
+          "description": "Boolean expression over bindings. A page with a truthy show_when takes priority and stays put — the carousel doesn't cycle away from it. Pages without show_when participate in the auto-advance carousel."
+        },
+        "auto_advance_sec": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Carousel mode. When this page is shown, switch to the next non-show_when page after this many seconds. Pages can each set their own dwell time."
+        },
+        "transition": {
+          "type": "string",
+          "enum": ["none", "slide_left", "slide_right", "slide_up", "slide_down", "fade"],
+          "default": "none",
+          "description": "Animation when transitioning INTO this page. Slides cost ~150ms and use extra RAM (two screens are alive at once during the slide)."
         },
         "bg": { "$ref": "#/$defs/color" },
         "rotation": {

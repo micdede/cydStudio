@@ -38,9 +38,11 @@ struct BoundWidget {
 };
 
 struct PageDef {
-  String id;
-  String show_when;
-  int    doc_index = -1;   // index into active_doc["pages"]
+  String   id;
+  String   show_when;
+  uint32_t auto_advance_ms = 0;     // 0 = no carousel
+  String   transition;               // "none","slide_left","slide_right","slide_up","slide_down","fade"
+  int      doc_index = -1;
 };
 
 lv_obj_t*                current_screen = nullptr;
@@ -50,6 +52,7 @@ int                      current_page_idx = -1;
 JsonDocument             active_doc;
 bool                     change_handler_installed = false;
 uint32_t                 g_restart_pending_at_ms = 0;
+lv_timer_t*              g_carousel_timer = nullptr;
 
 lv_color_t hex(const char* s, lv_color_t fallback) {
   if (!s || s[0] != '#' || strlen(s) != 7) return fallback;
@@ -269,6 +272,17 @@ JsonObjectConst page_object_at(int idx) {
   return active_doc.as<JsonObjectConst>();
 }
 
+lv_scr_load_anim_t parse_transition(const String& name) {
+  if (name == "slide_left")  return LV_SCR_LOAD_ANIM_MOVE_LEFT;
+  if (name == "slide_right") return LV_SCR_LOAD_ANIM_MOVE_RIGHT;
+  if (name == "slide_up")    return LV_SCR_LOAD_ANIM_MOVE_TOP;
+  if (name == "slide_down")  return LV_SCR_LOAD_ANIM_MOVE_BOTTOM;
+  if (name == "fade")        return LV_SCR_LOAD_ANIM_FADE_IN;
+  return LV_SCR_LOAD_ANIM_NONE;
+}
+
+void schedule_carousel_for(int idx);  // fwd
+
 void render_page(int idx) {
   if (idx < 0 || idx >= (int)pages.size()) return;
   if (idx == current_page_idx && current_screen != nullptr) return;
@@ -280,35 +294,93 @@ void render_page(int idx) {
 
   current_screen = lv_obj_create(nullptr);
   lv_obj_remove_style_all(current_screen);
-  // bg may live at page.bg (multi-page) or top-level page.bg (single-page).
   const char* bg = "#111111";
   if (page["bg"].is<const char*>())                       bg = page["bg"].as<const char*>();
   else if (active_doc["page"]["bg"].is<const char*>())    bg = active_doc["page"]["bg"].as<const char*>();
   lv_obj_set_style_bg_color(current_screen, hex(bg, lv_color_hex(0x111111)), 0);
   lv_obj_set_style_bg_opa(current_screen, LV_OPA_COVER, 0);
   lv_obj_clear_flag(current_screen, LV_OBJ_FLAG_SCROLLABLE);
-  lv_scr_load(current_screen);
 
-  if (prev_screen) lv_obj_del(prev_screen);
+  // Use animated load if the destination page declares a transition (and we
+  // have a previous screen to slide AWAY from). Animated loads automatically
+  // delete the previous screen for us — never call lv_obj_del on it after.
+  lv_scr_load_anim_t anim = parse_transition(pages[idx].transition);
+  if (prev_screen != nullptr && anim != LV_SCR_LOAD_ANIM_NONE) {
+    lv_scr_load_anim(current_screen, anim, /*time*/200, /*delay*/0, /*auto_del*/true);
+  } else {
+    lv_scr_load(current_screen);
+    if (prev_screen) lv_obj_del(prev_screen);
+  }
 
-  // Widgets array: page["widgets"] for multi-page, active_doc["widgets"] for legacy.
   JsonArrayConst widgets = page["widgets"].as<JsonArrayConst>();
   if (widgets.isNull()) widgets = active_doc["widgets"].as<JsonArrayConst>();
   for (JsonObjectConst w : widgets) build_widget(w, current_screen);
 
   current_page_idx = idx;
   Serial.printf("[render] page → %s (idx %d)\n", pages[idx].id.c_str(), idx);
+
+  // Set up auto-advance for the new page if it asked for one.
+  schedule_carousel_for(idx);
 }
 
-/// Pick the first page whose show_when is truthy (or the first page if no
-/// show_when matches). Switch to it if it's not already active.
+// Run on the next LVGL event-loop tick — must NOT happen synchronously inside
+// the timer callback because render_page reschedules the carousel, which
+// cancels (lv_timer_del) the timer that's currently firing → double free.
+void do_advance(void* /*user_data*/) {
+  if (pages.empty()) return;
+  int n = pages.size();
+  for (int step = 1; step <= n; ++step) {
+    int candidate = (current_page_idx + step) % n;
+    if (pages[candidate].show_when.length() == 0) {
+      render_page(candidate);
+      return;
+    }
+  }
+}
+
+void carousel_advance_cb(lv_timer_t* /*t*/) {
+  lv_async_call(do_advance, nullptr);
+}
+
+void cancel_carousel() {
+  if (g_carousel_timer) { lv_timer_del(g_carousel_timer); g_carousel_timer = nullptr; }
+}
+
+void schedule_carousel_for(int idx) {
+  cancel_carousel();
+  if (idx < 0 || idx >= (int)pages.size()) return;
+  uint32_t ms = pages[idx].auto_advance_ms;
+  if (ms == 0) return;
+  // Repeating timer is fine here: we explicitly cancel it on every page
+  // switch (in render_page → schedule_carousel_for), so the only firing
+  // it ever does is the next single tick before being replaced.
+  g_carousel_timer = lv_timer_create(carousel_advance_cb, ms, nullptr);
+}
+
+/// Pick the active page. show_when pages have priority — the first one whose
+/// expression is truthy wins and the carousel pauses. If none match, fall
+/// back to the first carousel page (or just the first page if none of those
+/// either). Switch only if the choice differs from the current page.
 void reevaluate_active_page() {
   if (pages.empty()) return;
-  int best = 0;
+
+  // Priority: any page whose show_when matches.
   for (size_t i = 0; i < pages.size(); ++i) {
-    if (eval_expr(pages[i].show_when)) { best = (int)i; break; }
+    const auto& p = pages[i];
+    if (p.show_when.length() > 0 && eval_expr(p.show_when)) {
+      if ((int)i != current_page_idx) render_page((int)i);
+      return;
+    }
   }
-  if (best != current_page_idx) render_page(best);
+
+  // Otherwise: a carousel page (or first page if no carousel exists).
+  // If we're already on a carousel page, leave it alone — the carousel
+  // timer will advance us in due course.
+  if (current_page_idx >= 0 && pages[current_page_idx].show_when.length() == 0) return;
+  for (size_t i = 0; i < pages.size(); ++i) {
+    if (pages[i].show_when.length() == 0) { render_page((int)i); return; }
+  }
+  render_page(0);
 }
 
 void on_datasource_change(const String& path) {
@@ -367,6 +439,8 @@ String apply_layout(const JsonDocument& doc) {
                                                 : (String("page-") + i);
       def.show_when = p["show_when"].is<const char*>() ? String(p["show_when"].as<const char*>())
                                                        : String("");
+      def.auto_advance_ms = (uint32_t)(p["auto_advance_sec"] | 0) * 1000U;
+      def.transition      = String(p["transition"] | "");
       def.doc_index = i;
       pages.push_back(def);
       ++i;
@@ -407,6 +481,7 @@ bool load_persisted() {
 }
 
 void shutdown() {
+  cancel_carousel();
   clear_bound_widgets();
   if (current_screen) { lv_obj_del(current_screen); current_screen = nullptr; }
   pages.clear();
