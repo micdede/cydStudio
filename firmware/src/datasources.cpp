@@ -11,6 +11,7 @@
 #include "datasources.h"
 
 #include <Arduino.h>
+#include <Preferences.h>
 #include <lvgl.h>
 #include <set>
 #include <time.h>
@@ -40,6 +41,30 @@ std::vector<ChangeCb>    change_callbacks;
 
 void notify(const String& path) {
   for (auto& cb : change_callbacks) cb(path);
+}
+
+void persist_source(const String& id) {
+  auto obj = value_tree[id].as<JsonObjectConst>();
+  if (obj.isNull()) return;
+  String s; serializeJson(obj, s);
+  Preferences prefs; prefs.begin("cydvals", false);
+  String key = "ds_" + id; key.remove(15);  // NVS key cap
+  prefs.putString(key.c_str(), s);
+  prefs.end();
+}
+
+void restore_source(const String& id) {
+  Preferences prefs; prefs.begin("cydvals", true);
+  String key = "ds_" + id; key.remove(15);
+  String s = prefs.getString(key.c_str(), "");
+  prefs.end();
+  if (s.length() == 0) return;
+  JsonDocument tmp;
+  if (deserializeJson(tmp, s)) return;
+  auto dst = value_tree[id].to<JsonObject>();
+  for (JsonPairConst kv : tmp.as<JsonObjectConst>())
+    dst[kv.key()] = kv.value();
+  Serial.printf("[ds] restored %s from NVS\n", id.c_str());
 }
 
 // --- __page.pct (carousel progress) -----------------------------------------
@@ -97,6 +122,7 @@ void configure(JsonArrayConst sources) {
       }
       push_sources.push_back(std::move(p));
       value_tree[id].to<JsonObject>();
+      restore_source(String(id));
     } else if (strcmp(type, "internal") == 0 && strcmp(s["source"] | "", "clock") == 0) {
       ClockSource c;
       c.id = id;
@@ -166,6 +192,7 @@ String accept_push(const String& source_id, const JsonDocument& body) {
     notify(source_id + "." + key);
   }
   src->last_push_ms = millis();
+  persist_source(source_id);
   return "";
 }
 
