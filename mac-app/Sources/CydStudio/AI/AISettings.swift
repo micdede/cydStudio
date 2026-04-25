@@ -30,7 +30,17 @@ final class AISettings {
         didSet { UserDefaults.standard.set(model, forKey: "ai.model.\(kind.rawValue)") }
     }
     var apiKey: String {
-        didSet { Keychain.set(apiKey, account: kind.rawValue) }
+        didSet {
+            // Pasted keys frequently arrive with a trailing newline or leading
+            // whitespace from the clipboard — Anthropic/OpenAI then reject them
+            // with a generic "invalid x-api-key" 401. Trim before persisting.
+            let trimmed = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed != apiKey {
+                apiKey = trimmed   // re-enters didSet, this time as no-op
+                return
+            }
+            Keychain.set(trimmed, account: kind.rawValue)
+        }
     }
 
     init() {
